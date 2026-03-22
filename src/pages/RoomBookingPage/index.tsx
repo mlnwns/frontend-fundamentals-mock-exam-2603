@@ -1,59 +1,25 @@
 import { css } from '@emotion/react';
 import { Border, Button, Spacing, Top } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageBackButton } from 'shared/components/PageBackButton';
 import { PageHorizontalPadding } from 'shared/components/PageHorizontalPadding';
-import { formatDate } from 'shared/utils/reservation';
 import { AvailableRoomsSection } from './components/AvailableRoomsSection';
 import { BookingConditionsSection } from './components/BookingConditionsSection';
 import { BookingErrorBanner } from './components/BookingErrorBanner';
 import { BookingValidationMessage } from './components/BookingValidationMessage';
 import { useAvailableRooms } from './hooks/useAvailableRooms';
+import { useBookingFilters } from './hooks/useBookingFilters';
 import { useRoomBookingData } from './hooks/useRoomBookingData';
-import type { BookingFilterActions, BookingFilters } from './types';
 import { isBookingFilterComplete, validateBookingFilters } from './utils/validation';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [date, setDate] = useState(searchParams.get('date') || formatDate(new Date()));
-  const [startTime, setStartTime] = useState(searchParams.get('startTime') || '');
-  const [endTime, setEndTime] = useState(searchParams.get('endTime') || '');
-  const [attendees, setAttendees] = useState(Number(searchParams.get('attendees')) || 1);
-  const [equipment, setEquipment] = useState<string[]>(
-    searchParams.get('equipment') ? searchParams.get('equipment')!.split(',').filter(Boolean) : []
-  );
-  const [preferredFloor, setPreferredFloor] = useState<number | null>(
-    searchParams.get('floor') ? Number(searchParams.get('floor')) : null
-  );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // URL 쿼리 파라미터 동기화
-  useEffect(() => {
-    const params: Record<string, string> = {};
-    if (date) params.date = date;
-    if (startTime) params.startTime = startTime;
-    if (endTime) params.endTime = endTime;
-    if (attendees > 1) params.attendees = String(attendees);
-    if (equipment.length > 0) params.equipment = equipment.join(',');
-    if (preferredFloor !== null) params.floor = String(preferredFloor);
-    setSearchParams(params, { replace: true });
-  }, [date, startTime, endTime, attendees, equipment, preferredFloor, setSearchParams]);
-
-  const { rooms, reservations, isBooking, bookRoom } = useRoomBookingData(date);
-
-  const filters: BookingFilters = {
-    date,
-    startTime,
-    endTime,
-    attendees,
-    equipment,
-    preferredFloor,
-  };
 
   // 필터 변경 시 선택 초기화
   const handleFilterChange = () => {
@@ -61,46 +27,14 @@ export function RoomBookingPage() {
     setErrorMessage(null);
   };
 
-  const handleDateChange = (value: string) => {
-    setDate(value);
-    handleFilterChange();
-  };
+  const { filters, filterActions } = useBookingFilters({
+    searchParams,
+    setSearchParams,
+    onFilterChange: handleFilterChange,
+  });
 
-  const handleStartTimeChange = (value: string) => {
-    setStartTime(value);
-    handleFilterChange();
-  };
-
-  const handleEndTimeChange = (value: string) => {
-    setEndTime(value);
-    handleFilterChange();
-  };
-
-  const handleAttendeesChange = (value: number) => {
-    setAttendees(value);
-    handleFilterChange();
-  };
-
-  const handlePreferredFloorChange = (value: number | null) => {
-    setPreferredFloor(value);
-    handleFilterChange();
-  };
-
-  const handleToggleEquipment = (eq: string) => {
-    const selected = equipment.includes(eq);
-    const next = selected ? equipment.filter(item => item !== eq) : [...equipment, eq];
-    setEquipment(next);
-    handleFilterChange();
-  };
-
-  const filterActions: BookingFilterActions = {
-    onDateChange: handleDateChange,
-    onStartTimeChange: handleStartTimeChange,
-    onEndTimeChange: handleEndTimeChange,
-    onAttendeesChange: handleAttendeesChange,
-    onPreferredFloorChange: handlePreferredFloorChange,
-    onToggleEquipment: handleToggleEquipment,
-  };
+  const { date, startTime, endTime, attendees, equipment } = filters;
+  const { rooms, reservations, isBooking, bookRoom } = useRoomBookingData(date);
 
   // 입력 검증
   const validationError = validateBookingFilters(filters);
