@@ -1,20 +1,18 @@
 import { css } from '@emotion/react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Border, Button, ListRow, Spacing, Text, Top } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { cancelReservation, getMyReservations, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EQUIPMENT_LABELS, HOUR_LABELS, TIMELINE_END, TOTAL_MINUTES } from 'shared/constants/reservation';
 import DatePicker from 'shared/components/DatePicker';
 import type { Reservation, RoomSummary } from 'shared/types';
 import { formatDate, timeToTimelineMinutes } from 'shared/utils/reservation';
+import { useReservationStatusData } from './hooks/useReservationStatusData';
 import type { ReservationLocationState, ReservationMessage } from './types';
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
   const [date, setDate] = useState(formatDate(new Date()));
 
   const locationState = location.state as ReservationLocationState;
@@ -28,23 +26,11 @@ export function ReservationStatusPage() {
     }
   }, [locationState]);
 
-  const { data: rooms = [] } = useQuery(['rooms'], getRooms);
-  const { data: reservations = [] } = useQuery(['reservations', date], () => getReservations(date), {
-    enabled: !!date,
-  });
-
-  const { data: myReservationList = [] } = useQuery(['myReservations'], getMyReservations);
-
-  const cancelMutation = useMutation((id: string) => cancelReservation(id), {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['reservations']);
-      queryClient.invalidateQueries(['myReservations']);
-    },
-  });
+  const { rooms, reservations, myReservationList, cancelReservationAsync } = useReservationStatusData(date);
 
   const handleCancel = async (id: string) => {
     try {
-      await cancelMutation.mutateAsync(id);
+      await cancelReservationAsync(id);
       setMessage({ type: 'success', text: '예약이 취소되었습니다.' });
     } catch {
       setMessage({ type: 'error', text: '취소에 실패했습니다.' });
