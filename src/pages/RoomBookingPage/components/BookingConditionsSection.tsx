@@ -5,38 +5,25 @@ import { ALL_EQUIPMENT, EQUIPMENT_LABELS, TIME_SLOTS } from 'shared/constants/re
 import DatePicker from 'shared/components/DatePicker';
 import { PageHorizontalPadding } from 'shared/components/PageHorizontalPadding';
 import { formatDate } from 'shared/utils/reservation';
+import type { BookingFilterActions, BookingFilters } from '../types';
 
 type BookingConditionsSectionProps = {
-  date: string;
-  startTime: string;
-  endTime: string;
-  attendees: number;
-  equipment: string[];
-  preferredFloor: number | null;
+  filters: BookingFilters;
   floors: number[];
-  onDateChange: (value: string) => void;
-  onStartTimeChange: (value: string) => void;
-  onEndTimeChange: (value: string) => void;
-  onAttendeesChange: (value: number) => void;
-  onPreferredFloorChange: (value: number | null) => void;
-  onToggleEquipment: (equipment: string) => void;
+  actions: BookingFilterActions;
 };
 
-export function BookingConditionsSection({
-  date,
-  startTime,
-  endTime,
-  attendees,
-  equipment,
-  preferredFloor,
-  floors,
-  onDateChange,
-  onStartTimeChange,
-  onEndTimeChange,
-  onAttendeesChange,
-  onPreferredFloorChange,
-  onToggleEquipment,
-}: BookingConditionsSectionProps) {
+export function BookingConditionsSection({ filters, floors, actions }: BookingConditionsSectionProps) {
+  const { date, startTime, endTime, attendees, equipment, preferredFloor } = filters;
+  const {
+    onDateChange,
+    onStartTimeChange,
+    onEndTimeChange,
+    onAttendeesChange,
+    onPreferredFloorChange,
+    onToggleEquipment,
+  } = actions;
+
   return (
     <PageHorizontalPadding>
       <Text typography="t5" fontWeight="bold" color={colors.grey900}>

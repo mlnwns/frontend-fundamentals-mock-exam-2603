@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { Border, Button, Spacing, Text, Top } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DatePicker from 'shared/components/DatePicker';
 import { PageHorizontalPadding } from 'shared/components/PageHorizontalPadding';
@@ -11,7 +11,8 @@ import { MyReservationSection } from './components/MyReservationSection';
 import { ReservationMessageBanner } from './components/ReservationMessageBanner';
 import { ReservationTimelineSection } from './components/ReservationTimelineSection';
 import { useReservationStatusData } from './hooks/useReservationStatusData';
-import type { ReservationLocationState, ReservationMessage } from './types';
+import { useReservationStatusUiState } from './hooks/useReservationStatusUiState';
+import type { ReservationLocationState } from './types';
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
@@ -19,28 +20,19 @@ export function ReservationStatusPage() {
   const [date, setDate] = useState(formatDate(new Date()));
 
   const locationState = location.state as ReservationLocationState;
-  const [message, setMessage] = useState<ReservationMessage | null>(
-    locationState?.message ? { type: 'success', text: locationState.message } : null
-  );
-
-  useEffect(() => {
-    if (locationState?.message) {
-      window.history.replaceState({}, '');
-    }
-  }, [locationState]);
+  const { message, activeReservationId, showCancelSuccess, showCancelFailure, toggleActiveReservation } =
+    useReservationStatusUiState(locationState);
 
   const { rooms, reservations, myReservationList, cancelReservationAsync } = useReservationStatusData(date);
 
   const handleCancel = async (id: string) => {
     try {
       await cancelReservationAsync(id);
-      setMessage({ type: 'success', text: '예약이 취소되었습니다.' });
+      showCancelSuccess();
     } catch {
-      setMessage({ type: 'error', text: '취소에 실패했습니다.' });
+      showCancelFailure();
     }
   };
-
-  const [activeReservation, setActiveReservation] = useState<string | null>(null);
 
   const getRoomName = (roomId: string) => rooms.find((r: RoomSummary) => r.id === roomId)?.name ?? roomId;
 
@@ -78,8 +70,8 @@ export function ReservationStatusPage() {
       <ReservationTimelineSection
         rooms={rooms}
         reservations={reservations}
-        activeReservationId={activeReservation}
-        onToggleReservation={id => setActiveReservation(prev => (prev === id ? null : id))}
+        activeReservationId={activeReservationId}
+        onToggleReservation={toggleActiveReservation}
       />
 
       <Spacing size={24} />

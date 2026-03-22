@@ -3,6 +3,7 @@ import { Border, Button, Spacing, Top } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { PageBackButton } from 'shared/components/PageBackButton';
 import { PageHorizontalPadding } from 'shared/components/PageHorizontalPadding';
 import { formatDate } from 'shared/utils/reservation';
 import { AvailableRoomsSection } from './components/AvailableRoomsSection';
@@ -11,7 +12,7 @@ import { BookingErrorBanner } from './components/BookingErrorBanner';
 import { BookingValidationMessage } from './components/BookingValidationMessage';
 import { useAvailableRooms } from './hooks/useAvailableRooms';
 import { useRoomBookingData } from './hooks/useRoomBookingData';
-import type { BookingFilters } from './types';
+import type { BookingFilterActions, BookingFilters } from './types';
 import { isBookingFilterComplete, validateBookingFilters } from './utils/validation';
 
 export function RoomBookingPage() {
@@ -92,6 +93,15 @@ export function RoomBookingPage() {
     handleFilterChange();
   };
 
+  const filterActions: BookingFilterActions = {
+    onDateChange: handleDateChange,
+    onStartTimeChange: handleStartTimeChange,
+    onEndTimeChange: handleEndTimeChange,
+    onAttendeesChange: handleAttendeesChange,
+    onPreferredFloorChange: handlePreferredFloorChange,
+    onToggleEquipment: handleToggleEquipment,
+  };
+
   // 입력 검증
   const validationError = validateBookingFilters(filters);
   const isFilterComplete = isBookingFilterComplete(filters, validationError);
@@ -137,24 +147,7 @@ export function RoomBookingPage() {
           padding: 12px 24px 0;
         `}
       >
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          aria-label="뒤로가기"
-          css={css`
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            font-size: 14px;
-            color: ${colors.grey600};
-            &:hover {
-              color: ${colors.grey900};
-            }
-          `}
-        >
-          ← 예약 현황으로
-        </button>
+        <PageBackButton label="예약 현황으로" onClick={() => navigate('/')} />
       </div>
       <Top.Top03
         css={css`
@@ -169,21 +162,7 @@ export function RoomBookingPage() {
 
       <Spacing size={24} />
 
-      <BookingConditionsSection
-        date={date}
-        startTime={startTime}
-        endTime={endTime}
-        attendees={attendees}
-        equipment={equipment}
-        preferredFloor={preferredFloor}
-        floors={floors}
-        onDateChange={handleDateChange}
-        onStartTimeChange={handleStartTimeChange}
-        onEndTimeChange={handleEndTimeChange}
-        onAttendeesChange={handleAttendeesChange}
-        onPreferredFloorChange={handlePreferredFloorChange}
-        onToggleEquipment={handleToggleEquipment}
-      />
+      <BookingConditionsSection filters={filters} floors={floors} actions={filterActions} />
 
       <BookingValidationMessage message={validationError} />
 
