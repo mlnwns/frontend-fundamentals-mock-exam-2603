@@ -5,29 +5,16 @@ import { colors } from '_tosslib/constants/colors';
 import { cancelReservation, getMyReservations, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  EQUIPMENT_LABELS,
+  HOUR_LABELS,
+  TIMELINE_END,
+  TIMELINE_START,
+  TOTAL_MINUTES,
+} from 'shared/constants/reservation';
 import type { Reservation, RoomSummary } from 'shared/types';
 import DatePicker from '../components/DatePicker';
 import type { ReservationLocationState, ReservationMessage } from './types';
-
-const EQUIPMENT_LABELS: Record<string, string> = {
-  tv: 'TV',
-  whiteboard: '화이트보드',
-  video: '화상장비',
-  speaker: '스피커',
-};
-
-const TIME_SLOTS: string[] = [];
-for (let h = 9; h <= 20; h++) {
-  TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
-  if (h < 20) {
-    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
-  }
-}
-
-const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
-const TIMELINE_START = 9;
-const TIMELINE_END = 20;
-const TOTAL_MINUTES = (TIMELINE_END - TIMELINE_START) * 60;
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
