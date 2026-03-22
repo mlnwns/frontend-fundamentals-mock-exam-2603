@@ -5,28 +5,11 @@ import { colors } from '_tosslib/constants/colors';
 import { cancelReservation, getMyReservations, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  EQUIPMENT_LABELS,
-  HOUR_LABELS,
-  TIMELINE_END,
-  TIMELINE_START,
-  TOTAL_MINUTES,
-} from 'shared/constants/reservation';
+import { EQUIPMENT_LABELS, HOUR_LABELS, TIMELINE_END, TOTAL_MINUTES } from 'shared/constants/reservation';
 import type { Reservation, RoomSummary } from 'shared/types';
+import { formatDate, timeToTimelineMinutes } from 'shared/utils/reservation';
 import DatePicker from '../components/DatePicker';
 import type { ReservationLocationState, ReservationMessage } from './types';
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function timeToMinutes(time: string): number {
-  const [h, m] = time.split(':').map(Number);
-  return (h - TIMELINE_START) * 60 + m;
-}
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
@@ -148,7 +131,7 @@ export function ReservationStatusPage() {
               `}
             >
               {HOUR_LABELS.map(t => {
-                const left = (timeToMinutes(t) / TOTAL_MINUTES) * 100;
+                const left = (timeToTimelineMinutes(t) / TOTAL_MINUTES) * 100;
                 return (
                   <Text
                     key={t}
@@ -213,8 +196,9 @@ export function ReservationStatusPage() {
                   `}
                 >
                   {roomReservations.map((res: Reservation) => {
-                    const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
-                    const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
+                    const left = (timeToTimelineMinutes(res.start) / TOTAL_MINUTES) * 100;
+                    const width =
+                      ((timeToTimelineMinutes(res.end) - timeToTimelineMinutes(res.start)) / TOTAL_MINUTES) * 100;
                     const isActive = activeReservation === res.id;
                     return (
                       <div
