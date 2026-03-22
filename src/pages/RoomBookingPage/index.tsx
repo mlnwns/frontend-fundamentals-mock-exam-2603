@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ALL_EQUIPMENT, EQUIPMENT_LABELS, TIME_SLOTS } from 'shared/constants/reservation';
 import DatePicker from 'shared/components/DatePicker';
+import { PageHorizontalPadding } from 'shared/components/PageHorizontalPadding';
 import type { CreateReservationPayload, Reservation, ReservationMutationResult, Room } from 'shared/types';
 import { formatDate } from 'shared/utils/reservation';
 
@@ -172,11 +173,7 @@ export function RoomBookingPage() {
       </Top.Top03>
 
       {errorMessage && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
+        <PageHorizontalPadding>
           <Spacing size={12} />
           <div
             css={css`
@@ -192,17 +189,13 @@ export function RoomBookingPage() {
               {errorMessage}
             </Text>
           </div>
-        </div>
+        </PageHorizontalPadding>
       )}
 
       <Spacing size={24} />
 
       {/* 예약 조건 입력 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
+      <PageHorizontalPadding>
         <Text typography="t5" fontWeight="bold" color={colors.grey900}>
           예약 조건
         </Text>
@@ -408,14 +401,10 @@ export function RoomBookingPage() {
             })}
           </div>
         </div>
-      </div>
+      </PageHorizontalPadding>
 
       {validationError && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
+        <PageHorizontalPadding>
           <Spacing size={8} />
           <span
             css={css`
@@ -426,7 +415,7 @@ export function RoomBookingPage() {
           >
             {validationError}
           </span>
-        </div>
+        </PageHorizontalPadding>
       )}
 
       <Spacing size={24} />
@@ -435,11 +424,7 @@ export function RoomBookingPage() {
 
       {/* 예약 가능 회의실 목록 */}
       {isFilterComplete && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
+        <PageHorizontalPadding>
           <div
             css={css`
               display: flex;
@@ -536,7 +521,7 @@ export function RoomBookingPage() {
           <Button display="full" onClick={handleBook} disabled={createMutation.isLoading}>
             {createMutation.isLoading ? '예약 중...' : '확정'}
           </Button>
-        </div>
+        </PageHorizontalPadding>
       )}
 
       <Spacing size={24} />
