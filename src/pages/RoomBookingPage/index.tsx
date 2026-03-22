@@ -7,6 +7,7 @@ import DatePicker from 'pages/components/DatePicker';
 import { createReservation, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import type { BookingReservation, BookingRoom, CreateReservationPayload, ReservationMutationResult } from './types';
 
 const EQUIPMENT_LABELS: Record<string, string> = {
   tv: 'TV',
@@ -67,16 +68,12 @@ export function RoomBookingPage() {
     enabled: !!date,
   });
 
-  const createMutation = useMutation(
-    (data: { roomId: string; date: string; start: string; end: string; attendees: number; equipment: string[] }) =>
-      createReservation(data),
-    {
-      onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries(['reservations', variables.date]);
-        queryClient.invalidateQueries(['myReservations']);
-      },
-    }
-  );
+  const createMutation = useMutation((data: CreateReservationPayload) => createReservation(data), {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries(['reservations', variables.date]);
+      queryClient.invalidateQueries(['myReservations']);
+    },
+  });
 
   // 필터 변경 시 선택 초기화
   const handleFilterChange = () => {
@@ -97,22 +94,21 @@ export function RoomBookingPage() {
   const isFilterComplete = hasTimeInputs && !validationError;
 
   // 필터링
-  const floors = [...new Set(rooms.map((r: { floor: number }) => r.floor))].sort((a: number, b: number) => a - b);
+  const floors = [...new Set(rooms.map((r: BookingRoom) => r.floor))].sort((a: number, b: number) => a - b);
 
   const availableRooms = isFilterComplete
     ? rooms
-        .filter((room: { id: string; capacity: number; equipment: string[]; floor: number }) => {
+        .filter((room: BookingRoom) => {
           if (room.capacity < attendees) return false;
           if (!equipment.every(eq => room.equipment.includes(eq))) return false;
           if (preferredFloor !== null && room.floor !== preferredFloor) return false;
           const hasConflict = reservations.some(
-            (r: { roomId: string; date: string; start: string; end: string }) =>
-              r.roomId === room.id && r.date === date && r.start < endTime && r.end > startTime
+            (r: BookingReservation) => r.roomId === room.id && r.date === date && r.start < endTime && r.end > startTime
           );
           if (hasConflict) return false;
           return true;
         })
-        .sort((a: { floor: number; name: string }, b: { floor: number; name: string }) => {
+        .sort((a: BookingRoom, b: BookingRoom) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
           return a.name.localeCompare(b.name);
         })
@@ -143,7 +139,7 @@ export function RoomBookingPage() {
         return;
       }
 
-      const errResult = result as { message?: string };
+      const errResult = result as ReservationMutationResult;
       setErrorMessage(errResult.message ?? '예약에 실패했습니다.');
       setSelectedRoomId(null);
     } catch (err: unknown) {
