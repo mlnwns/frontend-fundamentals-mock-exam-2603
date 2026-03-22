@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Border, Button, ListRow, Select, Spacing, Text, Top } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import axios from 'axios';
-import DatePicker from 'pages/components/DatePicker';
 import { createReservation, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ALL_EQUIPMENT, EQUIPMENT_LABELS, TIME_SLOTS } from 'shared/constants/reservation';
+import DatePicker from 'shared/components/DatePicker';
 import type { CreateReservationPayload, Reservation, ReservationMutationResult, Room } from 'shared/types';
 import { formatDate } from 'shared/utils/reservation';
 

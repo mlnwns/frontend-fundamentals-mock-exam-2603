@@ -6,9 +6,9 @@ import { cancelReservation, getMyReservations, getReservations, getRooms } from 
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EQUIPMENT_LABELS, HOUR_LABELS, TIMELINE_END, TOTAL_MINUTES } from 'shared/constants/reservation';
+import DatePicker from 'shared/components/DatePicker';
 import type { Reservation, RoomSummary } from 'shared/types';
 import { formatDate, timeToTimelineMinutes } from 'shared/utils/reservation';
-import DatePicker from '../components/DatePicker';
 import type { ReservationLocationState, ReservationMessage } from './types';
 
 export function ReservationStatusPage() {
