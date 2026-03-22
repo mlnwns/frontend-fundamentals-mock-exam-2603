@@ -5,8 +5,9 @@ import { colors } from '_tosslib/constants/colors';
 import { cancelReservation, getMyReservations, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import type { Reservation, RoomSummary } from 'shared/types';
 import DatePicker from '../components/DatePicker';
-import type { ReservationItem, ReservationLocationState, ReservationMessage, ReservationRoom } from './types';
+import type { ReservationLocationState, ReservationMessage } from './types';
 
 const EQUIPMENT_LABELS: Record<string, string> = {
   tv: 'TV',
@@ -82,7 +83,7 @@ export function ReservationStatusPage() {
 
   const [activeReservation, setActiveReservation] = useState<string | null>(null);
 
-  const getRoomName = (roomId: string) => rooms.find((r: ReservationRoom) => r.id === roomId)?.name ?? roomId;
+  const getRoomName = (roomId: string) => rooms.find((r: RoomSummary) => r.id === roomId)?.name ?? roomId;
 
   return (
     <div
@@ -183,8 +184,8 @@ export function ReservationStatusPage() {
           </div>
 
           {/* 회의실별 타임라인 */}
-          {rooms.map((room: ReservationRoom, index: number) => {
-            const roomReservations = reservations.filter((r: ReservationItem) => r.roomId === room.id);
+          {rooms.map((room: RoomSummary, index: number) => {
+            const roomReservations = reservations.filter((r: Reservation) => r.roomId === room.id);
             return (
               <div
                 key={room.id}
@@ -224,7 +225,7 @@ export function ReservationStatusPage() {
                     overflow: visible;
                   `}
                 >
-                  {roomReservations.map((res: ReservationItem) => {
+                  {roomReservations.map((res: Reservation) => {
                     const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
                     const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
                     const isActive = activeReservation === res.id;
@@ -372,7 +373,7 @@ export function ReservationStatusPage() {
               gap: 10px;
             `}
           >
-            {myReservationList.map((res: ReservationItem) => (
+            {myReservationList.map((res: Reservation) => (
               <div
                 key={res.id}
                 css={css`

@@ -7,7 +7,7 @@ import DatePicker from 'pages/components/DatePicker';
 import { createReservation, getReservations, getRooms } from 'pages/remotes';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { BookingReservation, BookingRoom, CreateReservationPayload, ReservationMutationResult } from './types';
+import type { CreateReservationPayload, Reservation, ReservationMutationResult, Room } from 'shared/types';
 
 const EQUIPMENT_LABELS: Record<string, string> = {
   tv: 'TV',
@@ -94,21 +94,21 @@ export function RoomBookingPage() {
   const isFilterComplete = hasTimeInputs && !validationError;
 
   // 필터링
-  const floors = [...new Set(rooms.map((r: BookingRoom) => r.floor))].sort((a: number, b: number) => a - b);
+  const floors = [...new Set(rooms.map((r: Room) => r.floor))].sort((a: number, b: number) => a - b);
 
   const availableRooms = isFilterComplete
     ? rooms
-        .filter((room: BookingRoom) => {
+        .filter((room: Room) => {
           if (room.capacity < attendees) return false;
           if (!equipment.every(eq => room.equipment.includes(eq))) return false;
           if (preferredFloor !== null && room.floor !== preferredFloor) return false;
           const hasConflict = reservations.some(
-            (r: BookingReservation) => r.roomId === room.id && r.date === date && r.start < endTime && r.end > startTime
+            (r: Reservation) => r.roomId === room.id && r.date === date && r.start < endTime && r.end > startTime
           );
           if (hasConflict) return false;
           return true;
         })
-        .sort((a: BookingRoom, b: BookingRoom) => {
+        .sort((a: Room, b: Room) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
           return a.name.localeCompare(b.name);
         })
